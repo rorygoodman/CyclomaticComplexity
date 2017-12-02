@@ -1,0 +1,19 @@
+{
+  "name": "slave",
+  "version": "1.0.0",
+  "description": "slave process",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/rorygoodman/ClyclomaticComplexity.git"
+  },
+  "author": "Rory Goodman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rorygoodman/ClyclomaticComplexity/issues"
+  },
+  "homepage": "https://github.com/rorygoodman/ClyclomaticComplexity#readme"
+}
