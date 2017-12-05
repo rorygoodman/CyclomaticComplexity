@@ -1,43 +1,34 @@
-var git = require("nodegit");
-var http = require('http');
-var fs = require("fs");
-var formidable = require("formidable");
-var util = require("util");
-var repo="";
-function onRequest(request,response){
-    console.log("user made request "+ request.toString())
-    if(request.method=="GET"){
-    	sendForm(response);
-	}
-	else if (request.method == "POST"){
-		processForm(request,response);
-	}
-}
+const git = require("nodegit");
+const http = require('http');
+const fs = require("fs");
+const formidable = require("formidable");
+const util = require("util");
+const request=require('request');
+var newPort = 3001
+var numWorkers=0;
+const bp = require('body-parser');
+const express = require('express');
 
-function sendForm(res) {
-    fs.readFile('form.html', function (err, data) {
-        res.writeHead(200, {
-            'Content-Type': 'text/html',
-            'Content-Length': data.length
-        });
-        res.write(data);
-        res.end();
-    });
-}
-function processForm(req, res) {
-    var form = new formidable.IncomingForm();
+var master = express();
+// parse application/x-www-form-urlencoded
+master.use(bp.json())
+master.use(bp.urlencoded({ extended: true }))
 
-    form.parse(req, function (err, fields, files) {
-        repo=fields.name;
-        git.Clone(repo, "./tmp")        
-        res.writeHead(200, {
-            'content-type': 'text/plain'
-        });
-        res.write('received the data:\n\n');
-        res.end();
-    });
-}
+// parse application/json
 
-http.createServer(onRequest).listen(8888, (err) =>{
-	console.log("server running");
-});
+
+master.get('/new',function (req, res) {
+  console.log("worker "+numWorkers+" connected" );
+    var data = {"workerNo": numWorkers,
+                "port": newPort};
+    newPort++;
+    numWorkers++;
+    res.send(data);
+})
+master.get('/work',function (req, res) {
+   console.log(JSON.parse(req.body).workerNo +" wants work"); 
+   res.send("hi");
+})
+
+master.listen(3000);
+
