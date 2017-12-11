@@ -18,6 +18,7 @@
   "homepage": "https://github.com/rorygoodman/ClyclomaticComplexity#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "escomplex": "^2.0.0-alpha",
     "express": "^4.16.2",
     "http": "0.0.0"
   }
