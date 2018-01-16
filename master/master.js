@@ -16,6 +16,8 @@ var workersToConnect=process.argv[2];
 var repoFiles=[];
 var numFiles=0;
 var nextFile=0;
+var repoName=process.argv[3];
+var totalResults=0;
 
 var complexities=[];
 // parse application/x-www-form-urlencoded
@@ -44,6 +46,7 @@ master.post('/more',function (req, res) {
   var worker=req.body.workerNo;
   var fileNo=req.body.fileNo;
   var result=req.body.result;
+  totalResults += parseInt(result);
   console.log("worker "+worker+" analyzed file "+fileNo+" \n score: "+result)
   complexities[fileNo]=result;
   if(nextFile<repoFiles.length){
@@ -53,6 +56,13 @@ master.post('/more',function (req, res) {
   else{
     request.post('http://localhost:'+slavePorts[worker], {form:{"file":"done"}});
     console.log("No more files for worker "+worker);
+    if(fileNo==repoFiles.length -1){
+      var average = totalResults/repoFiles.length;
+      console.log(totalResults);
+      console.log(repoFiles.length);
+      console.log("Average cyclomatic complexity of repo: "+average);
+    }
+    
   }
 
   
@@ -61,12 +71,12 @@ master.post('/more',function (req, res) {
 });
 
 function startWork(){
-    repo = git.Clone('https://github.com/callumduffy/http-s-proxy.git', path.join(__dirname,'./repo-folder')).catch((error) =>{
+    repo = git.Clone(repoName, path.join(__dirname,'./repo-folder')).catch((error) =>{
         console.log('Repo already cloned or doesnt exist');
     }).then((repo) => {
     //get array of js files
     repoToArray(path.join(__dirname,'./repo-folder'), /\.js$/);
-    console.log("Cloning done...ready to start calculating");
+    console.log("Cloned");
     console.log(repoFiles[nextFile]);
     for(var i=0;i<numWorkers&&i<repoFiles.length;i++){
         request.post('http://localhost:'+slavePorts[i], {form:{"file":repoFiles[nextFile],"fileNo":nextFile}});
@@ -79,18 +89,16 @@ function repoToArray(repoPath, fileType){
     var files = fs.readdirSync(repoPath);
     for (var i = 0; i < files.length; i++) {
       var file = path.join(repoPath, files[i]);
-      var fileOrDir = fs.lstatSync(file);
-      //check if a file or directory
-      //if directory, recursion
-      if(fileOrDir.isDirectory()){
+      var fileDir = fs.lstatSync(file);
+      if(fileDir.isDirectory()){
         repoToArray(file,fileType);
       }
       else if(fileType.test(file)){
         repoFiles.push(file);
         numFiles++;
       }
+    
     }
-
-};
+}
 
 master.listen(3000);
